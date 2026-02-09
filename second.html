@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valentine Proposal 💖</title>
+
+  <style>
+    /* =========================================================
+       PRO ROMANTIC UI – Single File
+       - Aurora background + animated gradient + subtle grain
+       - Glassmorphism card with glow
+       - No click => button moves + big 😒 bubble floats at side
+       - Yes click => romantic mode + message + hearts
+       ========================================================= */
+
+    :root{
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+
+      --glass: rgba(255,255,255,.12);
+      --glass2: rgba(255,255,255,.08);
+      --border: rgba(255,255,255,.22);
+      --shadow: rgba(0,0,0,.35);
+
+      --pink: #ff4fa3;
+      --pink2:#ff2f7d;
+      --violet:#8a5bff;
+      --cyan:#48d7ff;
+
+      --btnNoBg: rgba(255,255,255,.10);
+      --btnNoBorder: rgba(255,255,255,.28);
+
+      --easeOut: cubic-bezier(.16,.95,.2,1);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      color: var(--text);
+      overflow:hidden;
+      background:#07081a;
+    }
+
+    /* ------------------------------
+       Background: gradient + aurora
+       ------------------------------ */
+    .bg{
+      position:fixed; inset:0;
+      background:
+        radial-gradient(1100px 700px at 20% 15%, rgba(255, 80, 180, .35), transparent 55%),
+        radial-gradient(900px 650px at 80% 25%, rgba(72, 215, 255, .22), transparent 60%),
+        radial-gradient(1000px 750px at 55% 85%, rgba(255, 210, 150, .14), transparent 60%),
+        linear-gradient(120deg, #0b0f28, #160a2d, #081c3a);
+      background-size: 220% 220%;
+      animation: bgMove 10s ease-in-out infinite;
+      filter:saturate(1.08);
+    }
+    @keyframes bgMove{
+      0%{ background-position: 0% 10%; }
+      50%{ background-position: 100% 90%; }
+      100%{ background-position: 0% 10%; }
+    }
+
+    /* Aurora ribbons */
+    .aurora{
+      position:fixed; inset:-10%;
+      pointer-events:none;
+      opacity:.55;
+      mix-blend-mode: screen;
+      filter: blur(18px) saturate(1.2);
+      background:
+        radial-gradient(closest-side at 25% 30%, rgba(255, 64, 160, .45), transparent 60%),
+        radial-gradient(closest-side at 65% 35%, rgba(138, 91, 255, .35), transparent 62%),
+        radial-gradient(closest-side at 45% 70%, rgba(72, 215, 255, .20), transparent 65%);
+      transform: rotate(-8deg);
+      animation: auroraDrift 8s var(--easeOut) infinite alternate;
+    }
+    @keyframes auroraDrift{
+      from{ transform: translate(-1%, -1%) rotate(-10deg) scale(1.02); }
+      to{ transform: translate(2%, 1%) rotate(-4deg) scale(1.06); }
+    }
+
+    /* Subtle grain overlay */
+    .grain{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.18;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      background-size: 220px 220px;
+      animation: grainMove 6s steps(6) infinite;
+    }
+    @keyframes grainMove{
+      0%{ transform: translate(0,0); }
+      100%{ transform: translate(-120px, 80px); }
+    }
+
+    /* Romantic mode overlay */
+    .romanticOverlay{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:0;
+      transition: opacity 900ms ease;
+      background:
+        radial-gradient(700px 500px at 30% 25%, rgba(255, 70, 170, .30), transparent 62%),
+        radial-gradient(800px 520px at 70% 30%, rgba(255, 120, 160, .20), transparent 62%),
+        linear-gradient(180deg, rgba(255, 40, 120, .06), rgba(255, 40, 120, .14));
+      mix-blend-mode: screen;
+    }
+    body.is-romantic .romanticOverlay{ opacity:1; }
+
+    /* ------------------------------
+       Layout
+       ------------------------------ */
+    .stage{
+      position:relative;
+      height:100%;
+      display:grid;
+      place-items:center;
+      padding: 22px;
+      z-index: 2;
+    }
+
+    .card{
+      width: min(640px, 94vw);
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));
+      border: 1px solid var(--border);
+      box-shadow: 0 28px 80px rgba(0,0,0,.35);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: clamp(20px, 4vw, 34px);
+      position: relative;
+      overflow:hidden;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute; inset:-2px;
+      border-radius: 26px;
+      background:
+        radial-gradient(600px 180px at 20% 0%, rgba(255,255,255,.18), transparent 55%),
+        radial-gradient(480px 200px at 85% 10%, rgba(255, 80, 180, .12), transparent 60%);
+      pointer-events:none;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      font-size: 13px;
+      color: rgba(255,255,255,.78);
+      box-shadow: 0 16px 40px rgba(0,0,0,.22);
+    }
+
+    .title{
+      margin: 16px 0 10px;
+      font-size: clamp(28px, 4.6vw, 46px);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      text-align:center;
+      text-shadow: 0 12px 40px rgba(0,0,0,.35);
+    }
+
+    .subtitle{
+      margin: 0 auto 18px;
+      max-width: 52ch;
+      text-align:center;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: clamp(14px, 2.2vw, 16px);
+    }
+
+    .actions{
+      margin-top: 18px;
+      display:flex;
+      justify-content:center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button{
+      border:0;
+      border-radius: 16px;
+      padding: 12px 18px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor:pointer;
+      user-select:none;
+      touch-action: manipulation;
+      transition: transform 180ms ease, box-shadow 220ms ease, filter 220ms ease;
+      will-change: transform;
+    }
+    button:active{ transform: translateY(1px) scale(.99); }
+
+    .btn-yes{
+      color:white;
+      background: linear-gradient(135deg, var(--pink), var(--pink2));
+      box-shadow: 0 18px 46px rgba(255, 45, 120, .38);
+    }
+    .btn-yes:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 24px 62px rgba(255, 45, 120, .50);
+      filter: saturate(1.08);
+    }
+
+    /* NO button starts aligned near Yes */
+    .btn-no{
+      color: rgba(255,255,255,.92);
+      background: var(--btnNoBg);
+      border: 1px solid var(--btnNoBorder);
+      box-shadow: 0 16px 40px rgba(0,0,0,.22);
+    }
+    .btn-no:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 22px 56px rgba(0,0,0,.30);
+    }
+
+    .message{
+      margin: 18px auto 0;
+      text-align:center;
+      font-size: clamp(16px, 2.6vw, 18px);
+      line-height: 1.65;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      display:none;
+    }
+
+    .hint{
+      margin-top: 14px;
+      text-align:center;
+      font-size: 13px;
+      color: rgba(255,255,255,.62);
+    }
+
+    .hidden{ display:none !important; }
+
+    /* ------------------------------
+       Floating Hearts (romantic mode)
+       ------------------------------ */
+    .hearts{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:0;
+      transition: opacity 800ms ease;
+      overflow:hidden;
+      z-index: 3;
+    }
+    body.is-romantic .hearts{ opacity: 1; }
+
+    .heart{
+      position:absolute;
+      bottom:-40px;
+      font-size: 18px;
+      opacity: .95;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.28));
+      animation: floatUp linear infinite;
+      will-change: transform, opacity;
+      user-select:none;
+    }
+    @keyframes floatUp{
+      0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+      10%  { opacity: .95; }
+      100% { transform: translateY(-110vh) translateX(var(--drift)) scale(1.18); opacity: 0; }
+    }
+
+    /* ------------------------------
+       Side 😒 Bubble (graphics)
+       ------------------------------ */
+    .sideBubble{
+      position: fixed;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: min(260px, 42vw);
+      pointer-events:none;
+      z-index: 6;
+
+      opacity: 0;
+      filter: drop-shadow(0 24px 60px rgba(0,0,0,.35));
+    }
+
+    .bubbleCard{
+      position: relative;
+      border-radius: 22px;
+      padding: 18px 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.08));
+      border: 1px solid rgba(255,255,255,.20);
+      backdrop-filter: blur(14px);
+      overflow:hidden;
+    }
+
+    .bubbleCard::before{
+      content:"";
+      position:absolute; inset:-2px;
+      border-radius: 22px;
+      background:
+        radial-gradient(420px 180px at 20% 10%, rgba(255, 90, 180, .18), transparent 60%),
+        radial-gradient(360px 160px at 80% 20%, rgba(72, 215, 255, .12), transparent 62%);
+      pointer-events:none;
+    }
+
+    .emojiBig{
+      font-size: clamp(54px, 8vw, 84px);
+      line-height: 1;
+      text-align:center;
+      margin: 4px 0 10px;
+      transform: translateY(10px) scale(.96);
+    }
+
+    .bubbleText{
+      text-align:center;
+      color: rgba(255,255,255,.80);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    /* show animation when NO clicked */
+    .sideBubble.show{
+      opacity: 1;
+      animation: bubbleIn 520ms var(--easeOut) both;
+    }
+
+    @keyframes bubbleIn{
+      0%   { transform: translateY(-50%) translateX(18px) scale(.92); opacity: 0; }
+      60%  { opacity: 1; }
+      100% { transform: translateY(-50%) translateX(0) scale(1); opacity: 1; }
+    }
+
+    /* float (subtle) */
+    .sideBubble.floaty .bubbleCard{
+      animation: floatCard 2.6s ease-in-out infinite alternate;
+    }
+    @keyframes floatCard{
+      from{ transform: translateY(0); }
+      to  { transform: translateY(-8px); }
+    }
+
+    /* Little sparkle dots */
+    .sparkle{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity:.75;
+      background:
+        radial-gradient(2px 2px at 18% 28%, rgba(255,255,255,.65), transparent 60%),
+        radial-gradient(2px 2px at 74% 32%, rgba(255,255,255,.55), transparent 60%),
+        radial-gradient(2px 2px at 64% 74%, rgba(255,255,255,.55), transparent 60%),
+        radial-gradient(2px 2px at 28% 70%, rgba(255,255,255,.55), transparent 60%);
+      animation: sparkleTwinkle 1.8s ease-in-out infinite alternate;
+    }
+    @keyframes sparkleTwinkle{
+      from{ opacity:.35; }
+      to{ opacity:.8; }
+    }
+
+    /* ------------------------------
+       Runaway NO button (fixed on move)
+       ------------------------------ */
+    .btn-no.is-float{
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      z-index: 7;
+    }
+
+    @media (max-width: 520px){
+      .sideBubble{
+        right: 12px;
+        width: min(220px, 52vw);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="aurora" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="romanticOverlay" aria-hidden="true"></div>
+
+  <!-- Floating hearts layer -->
+  <div class="hearts" id="hearts" aria-hidden="true"></div>
+
+  <!-- Side 😒 bubble -->
+  <aside class="sideBubble" id="sideBubble" aria-hidden="true">
+    <div class="bubbleCard">
+      <div class="sparkle"></div>
+      <div class="emojiBig" id="emojiBig">😒</div>
+      <div class="bubbleText" id="bubbleText">Really? Trying to say <b>No</b>? 😒</div>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <section class="card" role="dialog" aria-label="Valentine Proposal">
+      <span class="badge">💌 A little question for you</span>
+
+      <h1 class="title">Will you be my Valentine?</h1>
+      <p class="subtitle">
+        I made this tiny page just for you. If you try pressing <b>No</b>, it might get… dramatic. ✨
+      </p>
+
+      <div class="actions" id="actions">
+        <button class="btn-yes" id="yesBtn" type="button">Yes 💖</button>
+        <button class="btn-no" id="noBtn" type="button">No 😒</button>
+      </div>
+
+      <div class="message" id="message" role="status" aria-live="polite"></div>
+      <div class="hint">Mobile + Desktop • Smooth animations • One-file build</div>
+    </section>
+  </main>
+
+  <script>
+    // =========================================================
+    // JS: interactions
+    // - Yes => romantic mode + message + hide buttons + hearts
+    // - No click => move button + show side 😒 bubble
+    // =========================================================
+
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const actions = document.getElementById("actions");
+    const message = document.getElementById("message");
+
+    const heartsWrap = document.getElementById("hearts");
+    const sideBubble = document.getElementById("sideBubble");
+    const bubbleText = document.getElementById("bubbleText");
+
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+    const rand  = (min, max) => Math.random() * (max - min) + min;
+
+    let vw = window.innerWidth;
+    let vh = window.innerHeight;
+
+    window.addEventListener("resize", () => {
+      vw = window.innerWidth;
+      vh = window.innerHeight;
+      // keep No inside viewport if floating
+      if (noBtn.classList.contains("is-float")) {
+        const rect = noBtn.getBoundingClientRect();
+        moveNoTo(
+          clamp(rect.left, 10, vw - rect.width - 10),
+          clamp(rect.top, 10, vh - rect.height - 10),
+          260
+        );
+      }
+    });
+
+    // Smooth movement settings
+    noBtn.style.transition = "left 460ms cubic-bezier(.16,.95,.2,1), top 460ms cubic-bezier(.16,.95,.2,1), transform 180ms ease, box-shadow 220ms ease";
+
+    function moveNoTo(x, y, duration = 460) {
+      noBtn.style.transitionDuration = duration + "ms";
+      noBtn.style.left = x + "px";
+      noBtn.style.top  = y + "px";
+      noBtn.style.transform = "translate(0,0)";
+    }
+
+    function safeRandomPos(awayFromX, awayFromY) {
+      const rect = noBtn.getBoundingClientRect();
+      const pad = 12;
+
+      const minX = pad;
+      const minY = pad;
+      const maxX = vw - rect.width - pad;
+      const maxY = vh - rect.height - pad;
+
+      let x = 0, y = 0, tries = 0;
+      while (tries < 60) {
+        x = rand(minX, maxX);
+        y = rand(minY, maxY);
+
+        const dist = Math.hypot(x - awayFromX, y - awayFromY);
+        if (dist > 260) break;
+        tries++;
+      }
+      return { x: clamp(x, minX, maxX), y: clamp(y, minY, maxY) };
+    }
+
+    // Side bubble show (on No click)
+    let bubbleTimer = null;
+    function showSideBubble(text) {
+      bubbleText.innerHTML = text;
+
+      // restart animation cleanly
+      sideBubble.classList.remove("show", "floaty");
+      void sideBubble.offsetWidth; // reflow
+      sideBubble.classList.add("show", "floaty");
+
+      if (bubbleTimer) clearTimeout(bubbleTimer);
+      bubbleTimer = setTimeout(() => {
+        sideBubble.classList.remove("show");
+      }, 1400);
+    }
+
+    // YES click
+    yesBtn.addEventListener("click", () => {
+      document.body.classList.add("is-romantic");
+
+      message.style.display = "block";
+      message.innerHTML = "Yay! You are my Valentine 💖<br/>I promise to make you smile — every single day. ✨";
+
+      actions.classList.add("hidden"); // hide both buttons
+      spawnHearts();
+    });
+
+    // NO click => move + side emoji bubble
+    let noClicks = 0;
+
+    noBtn.addEventListener("click", (e) => {
+      if (actions.classList.contains("hidden")) return; // if already accepted
+
+      noClicks++;
+
+      // Turn NO into floating/fixed so it can run around the viewport
+      if (!noBtn.classList.contains("is-float")) {
+        noBtn.classList.add("is-float");
+        const rect = noBtn.getBoundingClientRect();
+        moveNoTo(rect.left, rect.top, 0); // keep same place initially
+      }
+
+      const px = e.clientX ?? (vw / 2);
+      const py = e.clientY ?? (vh / 2);
+
+      const next = safeRandomPos(px, py);
+
+      const rect = noBtn.getBoundingClientRect();
+      const jumpDist = Math.hypot(next.x - rect.left, next.y - rect.top);
+      const duration = clamp(280 + jumpDist * 0.35, 280, 560);
+
+      moveNoTo(next.x, next.y, duration);
+
+      const lines = [
+        "Trying to click <b>No</b>? 😒",
+        "Nope. Not today. 😒✨",
+        "That button is in a relationship with <b>Yes</b>. 😒💘",
+        "You can run, but you can’t hide from love. 😒💖"
+      ];
+
+      showSideBubble(lines[Math.min(noClicks - 1, lines.length - 1)]);
+    }, { passive: true });
+
+    // Also make it run away when you get close (mouse/touch)
+    let lastMoveAt = 0;
+    function maybeRunAway(px, py) {
+      if (actions.classList.contains("hidden")) return;
+
+      // if user hasn't clicked NO yet, keep it near card
+      if (!noBtn.classList.contains("is-float")) return;
+
+      const now = performance.now();
+      if (now - lastMoveAt < 180) return;
+
+      const rect = noBtn.getBoundingClientRect();
+      const bx = rect.left + rect.width / 2;
+      const by = rect.top + rect.height / 2;
+
+      if (Math.hypot(px - bx, py - by) < 140) {
+        lastMoveAt = now;
+        const next = safeRandomPos(px, py);
+        const d = Math.hypot(next.x - rect.left, next.y - rect.top);
+        moveNoTo(next.x, next.y, clamp(260 + d * 0.32, 260, 520));
+      }
+    }
+
+    window.addEventListener("mousemove", (e) => {
+      maybeRunAway(e.clientX, e.clientY);
+    }, { passive: true });
+
+    window.addEventListener("touchmove", (e) => {
+      const t = e.touches[0];
+      if (!t) return;
+      maybeRunAway(t.clientX, t.clientY);
+    }, { passive: true });
+
+    // Hearts
+    let heartsTimer = null;
+
+    function spawnHearts() {
+      if (heartsTimer) return;
+
+      for (let i = 0; i < 14; i++) createHeart(true);
+      heartsTimer = setInterval(() => createHeart(false), 220);
+    }
+
+    function createHeart(initialBurst) {
+      const el = document.createElement("div");
+      el.className = "heart";
+
+      const set = ["💖","💘","💕","✨","💗"];
+      el.textContent = set[Math.floor(Math.random() * set.length)];
+
+      const size = initialBurst ? rand(16, 28) : rand(14, 26);
+      el.style.fontSize = size + "px";
+
+      el.style.left = rand(0, vw - 20) + "px";
+      el.style.setProperty("--drift", rand(-70, 70) + "px");
+
+      const duration = initialBurst ? rand(3.0, 5.0) : rand(3.8, 6.6);
+      el.style.animationDuration = duration + "s";
+
+      if (!initialBurst) el.style.animationDelay = rand(0, .7) + "s";
+
+      heartsWrap.appendChild(el);
+      setTimeout(() => el.remove(), (duration + 1) * 1000);
+    }
+  </script>
+</body>
+</html>
