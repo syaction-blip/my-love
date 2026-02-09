@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Valentine ❤️</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=2670&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; /* স্ক্রল বন্ধ */
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            width: 320px;
+            z-index: 10;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .gif-area img {
+            width: 140px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            height: 60px; /* বাটনের জন্য জায়গা ফিক্স রাখা */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        #yesBtn {
+            background-color: #ff3366;
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 51, 102, 0.4);
+            z-index: 100;
+        }
+        
+        #yesBtn:hover {
+            transform: scale(1.1);
+        }
+
+        #noBtn {
+            background-color: white;
+            color: #ff3366;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: absolute; /* এটা শুরুতে অ্যাবসোলিউট থাকবে */
+            transition: top 0.3s ease, left 0.3s ease; /* স্মুথ মুভমেন্ট */
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainBox">
+        <div class="gif-area">
+            <img id="mainGif" src="https://media.tenor.com/F0UWhr7M_eMAAAAi/mochi-cat.gif" alt="Cute Cat">
+        </div>
+
+        <h1 id="question">Will you be my Valentine? 🥺</h1>
+
+        <div class="btn-group">
+            <button id="yesBtn" onclick="acceptLove()">Yes! 💖</button>
+            <button id="noBtn">No 💔</button>
+        </div>
+    </div>
+
+    <script>
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const btnGroup = document.querySelector('.btn-group');
+
+        // শুরুতে No বাটনকে Yes বাটনের পাশে বসানো
+        // (যাতে শুরুতে পজিশন নিয়ে ঝামেলা না হয়)
+        function initPosition() {
+             // এটা শুধু নিশ্চিত করে যে বাটনটা শুরুতে গ্রুপের ভেতরেই আছে
+             noBtn.style.position = 'relative';
+        }
+        initPosition();
+
+        // ইভেন্ট লিসেনার (টাচ এবং মাউস দুইটই)
+        noBtn.addEventListener('mouseover', moveButton);
+        noBtn.addEventListener('touchstart', moveButton);
+        noBtn.addEventListener('click', moveButton); // ক্লিক করলেও পালাবে
+
+        function moveButton(e) {
+            // যদি টাচ ইভেন্ট হয়, তাহলে ডিফল্ট ক্লিক বন্ধ করো (যাতে নীল হাইলাইট না হয়)
+            if(e) e.preventDefault();
+
+            // ব্রাউজারের উইন্ডোর মাপ নেওয়া
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+
+            // বাটনের নিজের সাইজ নেওয়া
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+
+            // নতুন পজিশন ক্যালকুলেট করা (র‍্যান্ডম)
+            // কিন্তু বাটন যেন স্ক্রিনের বাইরে না যায়, তাই বাটনের সাইজ বিয়োগ করা হয়েছে
+            const maxLeft = windowWidth - btnWidth - 20; // 20px সেফটি মার্জিন
+            const maxTop = windowHeight - btnHeight - 20;
+
+            const randomLeft = Math.floor(Math.random() * maxLeft);
+            const randomTop = Math.floor(Math.random() * maxTop);
+
+            // এখন পজিশন সেট করা
+            noBtn.style.position = 'fixed'; // ফিক্সড মানে স্ক্রিনের সাপেক্ষে পজিশন
+            noBtn.style.left = randomLeft + 'px';
+            noBtn.style.top = randomTop + 'px';
+            
+            // z-index বাড়িয়ে দেওয়া যাতে অন্য কিছুর নিচে না পড়ে যায়
+            noBtn.style.zIndex = "999"; 
+        }
+
+        function acceptLove() {
+            const container = document.getElementById('mainBox');
+            container.innerHTML = `
+                <div class="gif-area">
+                    <img src="https://media.tenor.com/gUiu1zyxfzYAAAAi/bear-kiss-bear-kisses.gif" style="width: 180px;">
+                </div>
+                <h1 style="font-size: 2rem;">Yeaaaay! I knew it! ❤️🥰</h1>
+                <p style="color: white; font-size: 1.2rem;">See you on 14th Feb! 🌹</p>
+            `;
+            
+            // ব্যাকগ্রাউন্ড চেঞ্জ
+            document.body.style.backgroundImage = "url('https://images.unsplash.com/photo-1490750967868-58cb75069faf?q=80&w=2670&auto=format&fit=crop')";
+        }
+    </script>
+
+</body>
+</html>
